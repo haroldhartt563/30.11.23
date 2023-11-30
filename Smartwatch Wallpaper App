@@ -1,0 +1,61 @@
+// main.dart
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: WallpaperChanger(),
+    );
+  }
+}
+
+class WallpaperChanger extends StatefulWidget {
+  @override
+  _WallpaperChangerState createState() => _WallpaperChangerState();
+}
+
+class _WallpaperChangerState extends State<WallpaperChanger> {
+  String _newWallpaperUrl = ''; // Store the new wallpaper URL here
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Wallpaper Changer'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              onChanged: (value) {
+                _newWallpaperUrl = value;
+              },
+              decoration: InputDecoration(labelText: 'Enter Wallpaper URL'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _changeWallpaper();
+              },
+              child: Text('Change Wallpaper'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _changeWallpaper() {
+    // TODO: Implement code to send the new wallpaper URL to the smartwatch
+    // This may involve using platform channels or an API provided by the smartwatch SDK
+    // For demonstration purposes, we'll print the URL for now.
+    print('Changing wallpaper to: $_newWallpaperUrl');
+  }
+}
