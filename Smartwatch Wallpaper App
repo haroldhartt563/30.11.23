@@ -1,5 +1,9 @@
-// main.dart
+// Add this to your dependencies in pubspec.yaml:
+// http: ^0.13.3
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -20,7 +24,30 @@ class WallpaperChanger extends StatefulWidget {
 }
 
 class _WallpaperChangerState extends State<WallpaperChanger> {
-  String _newWallpaperUrl = '';
+  List<String> _wallpapers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWallpapers(); // Fetch wallpapers when the app starts
+  }
+
+  Future<void> fetchWallpapers() async {
+    final String apiUrl = 'https://api.unsplash.com/photos/random';
+    final String apiKey = 'YOUR_UNSPLASH_API_KEY';
+    final String query = 'anime,marvel'; // Search query for anime and Marvel wallpapers
+
+    final response = await http.get(Uri.parse('$apiUrl?query=$query&client_id=$apiKey'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _wallpapers = data.map((wallpaper) => wallpaper['urls']['regular']).toList();
+      });
+    } else {
+      throw Exception('Failed to fetch wallpapers');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,46 +55,20 @@ class _WallpaperChangerState extends State<WallpaperChanger> {
       appBar: AppBar(
         title: Text('Wallpaper Changer'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextField(
-                onChanged: (value) {
-                  _newWallpaperUrl = value;
-                },
-                decoration: InputDecoration(labelText: 'Enter Wallpaper URL'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _changeWallpaper();
-                },
-                child: Text('Change Wallpaper'),
-              ),
-            ],
-          ),
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 4.0,
+          mainAxisSpacing: 4.0,
         ),
+        itemCount: _wallpapers.length,
+        itemBuilder: (context, index) {
+          return Image.network(
+            _wallpapers[index],
+            fit: BoxFit.cover,
+          );
+        },
       ),
     );
-  }
-
-  void _changeWallpaper() {
-    if (_newWallpaperUrl.isNotEmpty) {
-      // Implement code to send the new wallpaper URL to the smartwatch
-      // This may involve using platform channels or an API provided by the smartwatch SDK
-
-      // For demonstration purposes, we'll print the URL for now.
-      print('Changing wallpaper to: $_newWallpaperUrl');
-    } else {
-      // Show a snackbar or alert indicating that the URL is empty
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a valid Wallpaper URL'),
-        ),
-      );
-    }
   }
 }
